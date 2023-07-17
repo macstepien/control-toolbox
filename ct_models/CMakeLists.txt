@@ -19,6 +19,19 @@ if(NOT TARGET ${ct_rbd})
 endif()
 find_package(Boost REQUIRED system filesystem)
 
+## include blasfeo and hpipm, assumed to be installed in "/opt"
+list(APPEND CMAKE_PREFIX_PATH "/opt")
+find_package(blasfeo QUIET)
+find_package(hpipm QUIET)
+if(blasfeo_FOUND AND hpipm_FOUND)
+    message(STATUS "Found HPIPM and BLASFEO")
+    set(HPIPM ON)
+    list(APPEND HPIPM_LIBS hpipm blasfeo)
+    list(APPEND ct_optcon_COMPILE_DEFINITIONS HPIPM)
+else()
+    message(WARNING "Could not find HPIPM or BLASFEO")
+endif()
+
 # extract interface compile definitions from previous ct packages as options
 importInterfaceCompileDefinitionsAsOptions(ct_core)
 importInterfaceCompileDefinitionsAsOptions(ct_optcon)
@@ -28,6 +41,8 @@ importInterfaceCompileDefinitionsAsOptions(ct_rbd)
 ## define the directories to be included in all ct_rbd targets
 set(ct_models_target_include_dirs
     ${ct_rbd_INCLUDE_DIRS}
+    ${blasfeo_INCLUDE_DIRS}
+    ${hpipm_INCLUDE_DIRS}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
